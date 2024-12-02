@@ -2,20 +2,27 @@ package com.example.activityapp;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
+import android.widget.Toast;
 
-import androidx.annotation.NonNull;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.activityapp.databinding.ActivityFirstBinding;
 
 public class FirstActivity extends AppCompatActivity {
 
-    private static final String KEY_COUNTER = "key_counter";
-
     private ActivityFirstBinding binding;
 
-    private int counter = 0;
+    private ActivityResultLauncher<Intent> defaultContractLauncher = registerForActivityResult(
+            new StartActivityForResult(),
+            result -> showToast(String.valueOf(result.getResultCode()))
+    );
+
+    private ActivityResultLauncher<String> customContractLauncher = registerForActivityResult(
+            new SecondActivityContract(),
+            result -> showToast(String.valueOf(result.getResultCode()))
+    );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,76 +30,28 @@ public class FirstActivity extends AppCompatActivity {
         binding = ActivityFirstBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        binding.textViewOne.setOnClickListener(v -> {
-            Intent intent = new Intent(this, SecondActivity.class);
-            startActivity(intent);
-        });
-
-        binding.textViewTwo.setOnClickListener(v -> {
-            counter += 1;
-            binding.textViewTwo.setText(String.valueOf(counter));
-        });
-
-        Log.d("ActivityLifecycle", String.valueOf(savedInstanceState));
-
-        if (savedInstanceState != null) {
-            counter = savedInstanceState.getInt(KEY_COUNTER);
-            binding.textViewTwo.setText(String.valueOf(counter));
-
-            binding.textViewStatus.setText("Activity recreated");
-        } else {
-            binding.textViewStatus.setText("Activity created for first time");
-        }
-
-        Log.d("ActivityLifecycle", "FirstActivity: onCreate()");
+        binding.primaryButton.setOnClickListener(v -> startSecondActivityForResultWithoutIntent());
     }
 
-    @Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putInt(KEY_COUNTER, counter);
-        Log.d("ActivityLifecycle", "FirstActivity: onSaveInstanceState()");
+    private String getFieldData() {
+        return binding.field.getText().toString();
     }
 
-    @Override
-    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        Log.d("ActivityLifecycle", "FirstActivity: onRestoreInstanceState()");
+    private void startSecondActivityWithIntent() {
+        Intent intent = SecondActivity.createIntent(this, getFieldData());
+        startActivity(intent);
     }
 
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-        Log.d("ActivityLifecycle", "FirstActivity: onRestart()");
+    private void startSecondActivityForResultWithIntent() {
+        Intent intent = SecondActivity.createIntent(this, getFieldData());
+        defaultContractLauncher.launch(intent);
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        Log.d("ActivityLifecycle", "FirstActivity: onStart()");
+    private void startSecondActivityForResultWithoutIntent() {
+        customContractLauncher.launch(getFieldData());
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Log.d("ActivityLifecycle", "FirstActivity: onResume()");
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        Log.d("ActivityLifecycle", "FirstActivity: onPause()");
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        Log.d("ActivityLifecycle", "FirstActivity: onStop()");
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        Log.d("ActivityLifecycle", "FirstActivity: onDestroy()");
+    private void showToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 }

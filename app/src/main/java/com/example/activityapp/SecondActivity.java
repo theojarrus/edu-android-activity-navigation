@@ -1,7 +1,8 @@
 package com.example.activityapp;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -9,7 +10,15 @@ import com.example.activityapp.databinding.ActivitySecondBinding;
 
 public class SecondActivity extends AppCompatActivity {
 
+    private static final String EXTRA_DATA = "extra_data";
+
     private ActivitySecondBinding binding;
+
+    public static Intent createIntent(Context context, String data) {
+        Intent intent = new Intent(context, SecondActivity.class);
+        intent.putExtra(EXTRA_DATA, data);
+        return intent;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -17,42 +26,15 @@ public class SecondActivity extends AppCompatActivity {
         binding = ActivitySecondBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        Log.d("ActivityLifecycle", "SecondActivity: onCreate()");
+        String data = getIntent().getStringExtra(EXTRA_DATA);
+        binding.textView.setText(data);
+
+        binding.okButton.setOnClickListener(v -> setResultAndFinish(100));
+        binding.cancelButton.setOnClickListener(v -> setResultAndFinish(200));
     }
 
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-        Log.d("ActivityLifecycle", "SecondActivity: onRestart()");
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        Log.d("ActivityLifecycle", "SecondActivity: onStart()");
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Log.d("ActivityLifecycle", "SecondActivity: onResume()");
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        Log.d("ActivityLifecycle", "SecondActivity: onPause()");
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        Log.d("ActivityLifecycle", "SecondActivity: onStop()");
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        Log.d("ActivityLifecycle", "SecondActivity: onDestroy()");
+    private void setResultAndFinish(int resultCode) {
+        setResult(resultCode);
+        finish();
     }
 }
